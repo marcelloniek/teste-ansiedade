@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 const perguntas = [
   "Eu sinto um aperto no peito ou uma sensação de sufocamento ao pensar em situações futuras ou decisões que preciso tomar.",
@@ -12,8 +12,37 @@ const perguntas = [
   "Sinto sintomas físicos como suor frio, tremores, enjoo ou taquicardia em momentos de tensão ou nervosismo.",
   "Minhas preocupações interferem diretamente no meu desempenho profissional ou nas minhas relações familiares e pessoais.",
   "Costumo pensar obsessivamente sobre coisas ruins que podem acontecer comigo ou com pessoas próximas.",
-  "Sinto que minha ansiedade está cada vez pior e fora do meu controle."
+  "Sinto que minha ansiedade está cada vez pior e fora do meu controle.",
 ];
+
+const opcoes = [
+  { valor: 1, main: "Muito pouco", sub: "Nunca" },
+  { valor: 2, main: "Pouco", sub: "Raramente" },
+  { valor: 3, main: "Mais ou menos", sub: "Às vezes" },
+  { valor: 4, main: "Muito", sub: "Frequentemente" },
+  { valor: 5, main: "Demais", sub: "Sempre" },
+];
+
+const textosResultado = {
+  VERDE:
+    "Você lida muito bem com esse tema e está emocionalmente bem resolvido. Poderá auxiliar grandemente outras pessoas que precisam de ajuda.",
+  AMARELO:
+    "Há sinais evidentes de dificuldades emocionais que precisam ser trabalhadas e que, com determinação e ajuda, poderão ser superadas.",
+  VERMELHO:
+    "Seus problemas emocionais com este tema precisam necessariamente de ajuda profissional. Procure com brevidade a ajuda de um médico ou psicólogo.",
+};
+
+const semaforoImagem = {
+  VERDE: "/images/semaforo-verde.png",
+  AMARELO: "/images/semaforo-amarelo.png",
+  VERMELHO: "/images/semaforo-vermelho.png",
+};
+
+function statusClass(resultado) {
+  if (resultado === "VERDE") return "green";
+  if (resultado === "AMARELO") return "yellow";
+  return "red";
+}
 
 export default function TesteAnsiedade() {
   const [respostas, setRespostas] = useState(Array(10).fill(0));
@@ -33,7 +62,8 @@ export default function TesteAnsiedade() {
   };
 
   const calcularResultado = (respostas) => {
-    if (respostas[5] >= 3) { // FLAG
+    if (respostas[5] >= 3) {
+      // FLAG
       setResultado("VERMELHO");
     } else {
       const soma = respostas.reduce((a, b) => a + b, 0);
@@ -49,84 +79,96 @@ export default function TesteAnsiedade() {
     setIndiceAtual(0);
   };
 
+  const total = perguntas.length;
+  const etapa = indiceAtual + 1;
+  const progresso = Math.round((etapa / total) * 100);
+
+  if (resultado) {
+    const status = statusClass(resultado);
+
+    return (
+      <main className="app">
+        <div className="shell">
+          <header className="header">
+            <div className="headerRow">
+              <div className="title">Teste de Ansiedade</div>
+              <div className="counter">Concluído</div>
+            </div>
+            <div className="progressTrack">
+              <div className="progressFill" style={{ width: "100%" }} />
+            </div>
+          </header>
+
+          <section className={`resultHero ${status}`}>
+            <h2 className="resultTitle">Resultado: {resultado}</h2>
+          </section>
+
+          <section className="card">
+            <img
+              src={semaforoImagem[resultado]}
+              alt={`Indicador ${resultado}`}
+              className="resultImage"
+            />
+
+            <p className="resultText">{textosResultado[resultado]}</p>
+
+            <div className="actions">
+              <button className="primaryBtn" onClick={reiniciarTeste}>
+                Refazer teste
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <div className="max-w-xl mx-auto p-6 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-md text-gray-900 dark:text-gray-100">
-      {!resultado ? (
-        <>
-          <h2 className="text-xl font-semibold mb-2 text-center">Teste de Ansiedade</h2>
-          <div className="mb-6 text-sm text-gray-700 dark:text-gray-300 text-center">
-            <p className="mb-4">
-              Indique com que frequência cada situação acontece com você atualmente:<br />
-              <strong>(1) Nunca | (2) Raramente | (3) Às vezes | (4) Frequentemente | (5) Sempre</strong>
-            </p>
+    <main className="app">
+      <div className="shell">
+        <header className="header">
+          <div className="headerRow">
+            <div className="title">Teste de Ansiedade</div>
+            <div className="counter">
+              {etapa}/{total}
+            </div>
           </div>
-
-          <p className="mb-4">{perguntas[indiceAtual]}</p>
-          
-          
-          <div className="flex justify-between items-end mb-4">
-            {[1, 2, 3, 4, 5].map((num) => {
-              const corGradiente = {
-                1: "from-gray-300 to-gray-400",
-                2: "from-blue-200 to-blue-300",
-                3: "from-blue-300 to-blue-400",
-                4: "from-blue-500 to-blue-600",
-                5: "from-blue-700 to-blue-800",
-              };
-
-              return (
-                <button
-                  key={num}
-                  onClick={() => registrarResposta(num)}
-                  className={`flex items-center justify-center rounded-full text-white font-bold hover:scale-110 transition transform bg-gradient-to-br ${corGradiente[num]}`}
-                  style={{
-                    width: `${30 + num * 5}px`,
-                    height: `${30 + num * 5}px`,
-                    fontSize: `${12 + num}px`
-                  }}
-                >
-                  {num}
-                </button>
-              );
-            })}
+          <div className="progressTrack">
+            <div className="progressFill" style={{ width: `${progresso}%` }} />
           </div>
+        </header>
 
+        <section className="card">
+          <p className="instruction">
+            Indique com que frequência cada situação acontece com você atualmente.
+            <br />
+            <strong>
+              (1) Nunca | (2) Raramente | (3) Às vezes | (4) Frequentemente | (5)
+              Sempre
+            </strong>
+          </p>
+          <h2 className="question">{perguntas[indiceAtual]}</h2>
+        </section>
 
-          <p className="mt-4 text-sm">Pergunta {indiceAtual + 1} de {perguntas.length}</p>
-        </>
-      ) : (
-        <>
-          
-          <h2 className="text-xl font-semibold mb-4 text-center">Resultado: {resultado}</h2>
-          <img
-            src={
-              resultado === "VERDE"
-                ? "/images/semaforo-verde.png"
-                : resultado === "AMARELO"
-                ? "/images/semaforo-amarelo.png"
-                : "/images/semaforo-vermelho.png"
-            }
-            alt={`Indicador ${resultado}`}
-            className="w-40 h-auto mx-auto mb-4"
-          />
-          {resultado === "VERDE" && (
-            <p className="text-center">Você lida muito bem com esse tema e está emocionalmente bem resolvido. Poderá auxiliar grandemente outras pessoas que precisam de ajuda.</p>
-          )}
-          {resultado === "AMARELO" && (
-            <p className="text-center">Há sinais evidentes de dificuldades emocionais que precisam ser trabalhadas e que, com determinação e ajuda, poderão ser superadas.</p>
-          )}
-          {resultado === "VERMELHO" && (
-            <p className="text-center">Seus problemas emocionais com este tema precisam necessariamente de ajuda profissional. Procure com brevidade a ajuda de um médico ou psicólogo.</p>
-          )}
-          <button
-            className="mt-6 px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 block mx-auto"
-            onClick={reiniciarTeste}
-          >
-            Refazer teste
-          </button>
+        <section className="answers">
+          {opcoes.map((opt) => (
+            <button
+              key={opt.valor}
+              className="answerBtn"
+              onClick={() => registrarResposta(opt.valor)}
+              aria-label={`Responder ${opt.sub} (${opt.valor})`}
+            >
+              <span className="answerLabel">
+                <span className="answerMain">{opt.main}</span>
+                <span className="answerSub">{opt.sub}</span>
+              </span>
+              <span className="badge">{opt.valor}</span>
+            </button>
+          ))}
+        </section>
 
-        </>
-      )}
-    </div>
+        <div className="footerNote">Toque em uma opção para avançar.</div>
+      </div>
+    </main>
   );
 }
